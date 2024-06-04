@@ -1,7 +1,23 @@
 import Image from "next/image";
 import styles from "./page.module.css";
 
-export default function Home() {
+export default async function Home() {
+  async function getData() {
+    const res = await fetch("http://localhost:3001/api/auth", {
+      headers: {
+        Accept: "application/json",
+        method: "GET",
+      },
+    });
+
+    if (res) {
+      const data = res.json();
+      return data;
+    }
+
+    throw new Error("Failed to fetch data");
+  }
+
   return (
     <main className={styles.main}>
       <div className={styles.description}>

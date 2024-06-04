@@ -1,0 +1,361 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model MyUser {
+  id       Int     @id @default(autoincrement()) @map("ID")
+  userID   String? @unique @map("User_ID") @db.VarChar(100)
+  userName String? @map("User_NAME") @db.VarChar(100)
+  password Int?    @map("Password") @db.Int()
+
+  @@map("my_user")
+}
+
+model Code {
+  id         Int      @id @default(autoincrement()) @map("ID")
+  codeID     String   @unique @map("Code_ID") @db.VarChar(3)
+  codeIdName String   @map("Code_IDName") @db.VarChar(100)
+  codeValue  String   @unique @map("Code_Value") @db.VarChar(5)
+  codeName   String   @map("Code_Name") @db.VarChar(100)
+  createDate DateTime @default(now()) @map("Create_Date")
+  createUser String   @map("Create_User") @db.VarChar(20)
+  updateDate DateTime @default(now()) @updatedAt @map("Update_Date")
+  updateUser String   @map("Update_User") @db.VarChar(20)
+  deleteFlag Int      @map("Delete_Flag") @db.TinyInt()
+
+  // Relations
+  // products Product[]
+  // sales    Sale[]
+
+  @@map("m_code")
+}
+
+model Information {
+  id           Int      @id @default(autoincrement()) @map("ID")
+  content      String?  @map("Content") @db.VarChar(100)
+  title        String?  @map("Title") @db.VarChar(20)
+  displayOrder Decimal? @map("DispOrder") @db.Decimal(10, 0)
+  displayFlag  Int?     @map("DispFlag") @db.TinyInt()
+  infoDate     Int?     @map("InfoDate")
+
+  @@map("m_information")
+}
+
+model Customer {
+  id              Int      @id @default(autoincrement()) @map("ID")
+  customerCode    String   @unique @map("Customer_CD") @db.VarChar(10)
+  customerName    String   @map("Customer_Name") @db.VarChar(100)
+  corporationCode String   @map("Corporation_CD") @db.VarChar(10)
+  state           Int      @map("State") @db.TinyInt()
+  createDate      DateTime @default(now()) @map("Create_Date")
+  createUser      String   @map("Create_User") @db.VarChar(20)
+  updateDate      DateTime @default(now()) @updatedAt @map("Update_Date")
+  updateUser      String   @map("Update_User") @db.VarChar(255)
+  deleteFlag      Int      @map("Delete_Flag") @db.TinyInt()
+
+  // Relations
+  purchasingPrices PurchasingPrice[]
+  sales            Sale[]
+  salePrices       SalePrice[]
+
+  user User? @relation(fields: [createUser], references: [userID])
+
+  @@map("m_customer")
+}
+
+model Division {
+  id           Int      @id @default(autoincrement()) @map("ID")
+  divisionCode String   @unique @map("Division_CD") @db.VarChar(6)
+  divisionName String   @map("Division_Name") @db.VarChar(100)
+  createDate   DateTime @default(now()) @map("Create_Date")
+  createUser   String   @map("Create_User") @db.VarChar(20)
+  updateDate   DateTime @default(now()) @updatedAt @map("Update_Date")
+  updateUser   String   @map("Update_User") @db.VarChar(255)
+  deleteFlag   Int      @map("Delete_Flag") @db.TinyInt()
+
+  // Relations
+  users User[]
+
+  @@map("m_division")
+}
+
+model Maker {
+  id         Int      @id @default(autoincrement()) @map("ID")
+  makerCode  String   @unique @map("Maker_CD") @db.VarChar(10)
+  makerName  String   @map("Maker_Name") @db.VarChar(100)
+  state      Int      @map("State") @db.TinyInt()
+  createDate DateTime @default(now()) @map("Create_Date")
+  createUser String   @map("Create_User") @db.VarChar(20)
+  updateDate DateTime @default(now()) @updatedAt @map("Update_Date")
+  updateUser String   @map("Update_User") @db.VarChar(255)
+  deleteFlag Int      @map("Delete_Flag") @db.TinyInt()
+
+  // Relations
+  products Product[]
+
+  user User? @relation(fields: [createUser], references: [userID])
+
+  @@map("m_maker")
+}
+
+model Office {
+  id         Int      @id @default(autoincrement()) @map("ID")
+  officeCode String   @unique @map("Office_CD") @db.VarChar(6)
+  officeName String   @map("Office_Name") @db.VarChar(100)
+  createDate DateTime @default(now()) @map("Create_Date")
+  createUser String   @map("Create_User") @db.VarChar(20)
+  updateDate DateTime @default(now()) @updatedAt @map("Update_Date")
+  updateUser String   @map("Update_User") @db.VarChar(255)
+  deleteFlag Int      @map("Delete_Flag") @db.TinyInt()
+
+  // Relations
+  users User[]
+  sales Sale[]
+
+  @@map("m_office")
+}
+
+model ShippingBase {
+  id               Int      @id @default(autoincrement()) @map("ID")
+  shippingBaseCode String?  @unique @map("Shipping_Base_CD") @db.VarChar(255)
+  shippingBaseName String?  @map("Shipping_Base_Name") @db.VarChar(255)
+  state            Int?     @map("State")
+  createDate       DateTime @default(now()) @map("Create_Date")
+  createUser       String?  @map("Create_User") @db.VarChar(255)
+  updateDate       DateTime @default(now()) @updatedAt @map("Update_Date")
+  updateUser       String?  @map("Update_User") @db.VarChar(255)
+  deleteFlag       Int      @default(0) @map("Delete_Flag")
+
+  // Relationss
+  users User[] @relation("shippingBaseByUser")
+  sales Sale[]
+
+  user User? @relation(name: "createdByUser", fields: [createUser], references: [userID])
+
+  @@map("m_shipping_base")
+}
+
+model Supplier {
+  id              Int      @id @default(autoincrement()) @map("ID")
+  supplierCode    String?  @unique @map("Supplier_CD") @db.VarChar(255)
+  supplierName    String?  @map("Supplier_Name") @db.VarChar(255)
+  corporationCode String?  @map("Corporation_CD") @db.VarChar(255)
+  state           Int?     @map("State")
+  createDate      DateTime @default(now()) @map("Create_Date")
+  createUser      String?  @map("Create_User") @db.VarChar(255)
+  updateDate      DateTime @default(now()) @updatedAt @map("Update_Date")
+  updateUser      String?  @map("Update_User") @db.VarChar(255)
+  deleteFlag      Int      @default(0) @map("Delete_Flag")
+
+  // Relations
+  purchasingPrices PurchasingPrice[]
+  sales            Sale[]
+
+  user User? @relation(fields: [createUser], references: [userID])
+
+  @@map("m_supplier")
+}
+
+model User {
+  id       Int    @id @default(autoincrement()) @map("ID")
+  userID   String @unique @map("User_ID") @db.VarChar(20)
+  userName String @map("User_Name") @db.VarChar(100)
+  password String @map("Password") @db.VarChar(20)
+
+  divisionCode        String?  @map("Division_CD") @db.VarChar(255)
+  officeCode          String?  @map("Office_CD") @db.VarChar(255)
+  mail                String?  @map("Mail") @db.VarChar(255)
+  approvalAuthority   Int?     @map("Approval_Authority")
+  managementAuthority String?  @map("Management_Authority") @db.VarChar(255)
+  shippingBaseFlag    Int?     @map("Shipping_Base_Flag")
+  shippingBaseCode    String?  @map("Shipping_Base_CD")
+  broadcasterFlag     Int?     @map("Broadcaster_Flag")
+  createUser          String?  @map("Create_User") @db.VarChar(255)
+  createDate          DateTime @default(now()) @map("Create_Date")
+  updateDate          DateTime @default(now()) @updatedAt @map("Update_Date")
+  updateUser          String?  @map("Update_User") @db.VarChar(255)
+  deleteFlag          Int      @default(0) @map("Delete_Flag")
+
+  // Relations
+  products         Product[]
+  sales            Sale[]
+  salePrices       SalePrice[]
+  purchasingPrices PurchasingPrice[]
+  makers           Maker[]
+  suppliers        Supplier[]
+  customers        Customer[]
+  shippingBases    ShippingBase[]    @relation("createdByUser")
+  division         Division?         @relation(fields: [divisionCode], references: [divisionCode])
+  office           Office?           @relation(fields: [officeCode], references: [officeCode])
+
+  shippingBase ShippingBase? @relation(name: "shippingBaseByUser", fields: [shippingBaseCode], references: [shippingBaseCode])
+
+  // other field 
+  @@map("m_user")
+}
+
+model ProductDetail {
+  id            Int      @id @default(autoincrement()) @map("ID")
+  productCode   String   @unique @map("Product_CD") @db.VarChar(13)
+  phoneticName  String?  @unique @map("Phonetic_Name") @db.VarChar(100)
+  material      String?  @map("Material") @db.VarChar(100)
+  description   String?  @map("Description") @db.VarChar(500)
+  keyword       String?  @map("Keyword") @db.VarChar(100)
+  specification String?  @map("Specification") @db.VarChar(100)
+  itemNumber    String?  @map("Item_Number") @db.VarChar(50)
+  information   String?  @map("Information") @db.VarChar(100)
+  colorCode     String?  @map("Color_Code") @db.VarChar(50)
+  width         Decimal? @map("width") @db.Decimal(8, 0)
+  widthUnit     String?  @map("width_Unit") @db.VarChar(10)
+  stockOrDirect String?  @map("Stock_Or_Direct") @db.VarChar(20)
+  height        Decimal? @map("Height") @db.Decimal(8, 0)
+  heightUnit    String?  @map("Height_Unit") @db.VarChar(10)
+  thickness     Decimal? @map("Thickness") @db.Decimal(8, 0)
+  thicknessUnit String?  @map("Thickness_Unit") @db.VarChar(10)
+  price         Decimal? @map("Price") @db.Decimal(8, 0)
+  capacity      Decimal? @map("Capacity") @db.Decimal(8, 0)
+  capacityUnit  String?  @map("Capacity_Unit") @db.VarChar(10)
+  appliedFrom   String?  @map("Applied_From") @db.VarChar(8)
+  mass          Decimal? @map("Mass") @db.Decimal(8, 0)
+  massUnit      String?  @map("Mass_Unit") @db.VarChar(10)
+  itemImage1    String?  @map("Item_Image_1") @db.VarChar(500)
+  itemImage2    String?  @map("Item_Image_2") @db.VarChar(500)
+  itemImage3    String?  @map("Item_Image_3") @db.VarChar(500)
+  itemImage4    String?  @map("Item_Image_4") @db.VarChar(500)
+  itemImage5    String?  @map("Item_Image_5") @db.VarChar(500)
+  pdf           String?  @map("PDF") @db.VarChar(500)
+  status        String?  @map("Status") @db.VarChar(20)
+
+  // Relations
+  product Product?
+
+  @@map("m_product_detail")
+}
+
+model Product {
+  id             Int      @id @default(autoincrement()) @map("ID")
+  productCode    String   @unique @map("Product_CD") @db.VarChar(13)
+  makerCode      String?  @map("Maker_CD") @db.VarChar(10)
+  productName    String?  @map("Product_Name") @db.VarChar(80)
+  category1      String?  @map("Category1") @db.VarChar(3)
+  category2      String?  @map("Category2") @db.VarChar(3)
+  category3      String?  @map("Category3") @db.VarChar(3)
+  partNumber     String?  @map("Part_Number") @db.VarChar(40)
+  inputNumber    Decimal? @map("Input_Number") @db.Decimal(5, 0)
+  inputUnit      String?  @map("Input_Unit") @db.VarChar(2)
+  standard       String?  @map("Standard") @db.VarChar(40)
+  oldProductCode String?  @map("Old_Product_CD") @db.VarChar(500)
+  purchasingUnit String?  @map("Purchasing_Unit") @db.VarChar(2)
+  shortageFlag   Int      @map("Shortage_Flag") @db.TinyInt()
+  remarks        String?  @map("Remarks") @db.VarChar(200)
+  productType    String?  @map("Product_Type") @db.VarChar(2)
+  state          Int      @map("State") @db.TinyInt()
+  createDate     DateTime @default(now()) @map("Create_Date")
+  createUser     String   @map("Create_User") @db.VarChar(20)
+  updateDate     DateTime @default(now()) @updatedAt @map("Update_Date")
+  updateUser     String   @map("Update_User") @db.VarChar(255)
+  deleteFlag     Int      @map("Delete_Flag") @db.TinyInt()
+
+  // Relations
+  productDetail    ProductDetail?    @relation(fields: [productCode], references: [productCode])
+  maker            Maker?            @relation(fields: [inputUnit], references: [makerCode])
+  user             User?             @relation(fields: [createUser], references: [userID])
+  // code             Code?             @relation(fields: [state], references: [codeValue])
+  purchasingPrices PurchasingPrice[]
+  sales            Sale[]
+  salePrices       SalePrice[]
+
+  @@map("m_product")
+}
+
+model PurchasingPrice {
+  id               Int      @id @default(autoincrement()) @map("ID")
+  supplierCode     String   @map("Supplier_CD") @db.VarChar(10)
+  productCode      String   @map("Product_CD") @db.VarChar(13)
+  customerCode     String?  @map("Customer_CD") @db.VarChar(10)
+  mansionOrderCode String?  @map("Mansion_Order_CD") @db.VarChar(11)
+  startDate        String   @map("Start_Date") @db.VarChar(8)
+  unitPrice        Decimal  @map("Unit_Price") @db.Decimal(10, 2)
+  state            Int      @map("State") @db.TinyInt()
+  createDate       DateTime @default(now()) @map("Create_Date")
+  createUser       String   @map("Create_User") @db.VarChar(20)
+  updateDate       DateTime @default(now()) @updatedAt @map("Update_Date")
+  updateUser       String   @map("Update_User") @db.VarChar(255)
+  deleteFlag       Int      @map("Delete_Flag") @db.TinyInt()
+
+  // Relations
+  supplier Supplier? @relation(fields: [supplierCode], references: [supplierCode])
+  product  Product?  @relation(fields: [productCode], references: [productCode])
+  customer Customer? @relation(fields: [customerCode], references: [customerCode])
+  user     User?     @relation(fields: [createUser], references: [userID])
+
+  @@map("m_purchasing_price")
+}
+
+model SalePrice {
+  id               Int      @id @default(autoincrement()) @map("ID")
+  customerCode     String   @map("Customer_CD") @db.VarChar(10)
+  productCode      String   @map("Product_CD") @db.VarChar(13)
+  mansionOrderCode String?  @map("Mansion_Order_CD") @db.VarChar(11)
+  startDate        String?  @map("Start_Date") @db.VarChar(8)
+  state            Int      @map("State") @db.TinyInt()
+  createDate       DateTime @default(now()) @map("Create_Date")
+  createUser       String   @map("Create_User") @db.VarChar(20)
+  updateDate       DateTime @default(now()) @updatedAt @map("Update_Date")
+  updateUser       String   @map("Update_User") @db.VarChar(20)
+  deleteFlag       Int      @map("Delete_Flag") @db.TinyInt()
+
+  // Relations
+  customer Customer? @relation(fields: [customerCode], references: [customerCode])
+  product  Product?  @relation(fields: [productCode], references: [productCode])
+  user     User?     @relation(fields: [createUser], references: [userID])
+
+  @@map("m_sale_price")
+}
+
+model Sale {
+  id                Int      @id @default(autoincrement()) @map("ID") @db.Int()
+  productCode       String   @map("Product_CD") @db.VarChar(13)
+  startingDate      String   @map("Starting_Date") @db.VarChar(8)
+  officeCode        String   @map("Office_CD") @db.VarChar(6)
+  supplierCode      String?  @map("Supplier_CD") @db.VarChar(10)
+  purchasingPrice   Decimal? @map("Purchasing_Price") @db.Decimal(10, 2)
+  orderUnit         Decimal? @map("Order_Unit") @db.Decimal(5, 0)
+  deliveryDay       Decimal? @map("Delivery_Day") @db.Decimal(2, 0)
+  flight            Decimal? @map("Flight") @db.Decimal(3, 0)
+  directDeliveryKbn String   @map("Direct_Delivery_Kbn") @db.VarChar(1)
+  shippingBaseCode  String?  @map("Shipping_Base_CD") @db.VarChar(10)
+  salePrice         Decimal? @map("Sale_Price") @db.Decimal(10, 2)
+  mansionOrderCode  String?  @map("Mansion_Order_CD") @db.VarChar(11)
+  minOrderLot       Decimal? @map("Min_Order_Lot") @db.Decimal(3, 0)
+  remarks           String?  @map("Remarks") @db.VarChar(200)
+  state             Int      @map("State") @db.TinyInt()
+  createDate        DateTime @default(now()) @map("Create_Date")
+  createUser        String   @map("Create_User") @db.VarChar(20)
+  updateDate        DateTime @default(now()) @updatedAt @map("Update_Date")
+  updateUser        String   @map("Update_User") @db.VarChar(20)
+  deleteFlag        Int      @map("Delete_Flag") @db.TinyInt()
+  customerCode      String?  @map("Customer_CD") @db.VarChar(10)
+
+  // Relations
+  product      Product?      @relation(fields: [productCode], references: [productCode])
+  supplier     Supplier?     @relation(fields: [supplierCode], references: [supplierCode])
+  customer     Customer?     @relation(fields: [customerCode], references: [customerCode])
+  shippingBase ShippingBase? @relation(fields: [shippingBaseCode], references: [shippingBaseCode])
+  office       Office?       @relation(fields: [officeCode], references: [officeCode])
+  user         User?         @relation(fields: [createUser], references: [userID])
+  // code         Code?         @relation(fields: [state], references: [codeValue])
+
+  @@map("m_sale")
+}
